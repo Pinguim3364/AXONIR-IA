@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛸 AXONIR PRO - 100% Free AI IDE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --spark-color: #FFD700;
+            --spark-accent: #FFA500;
+            --apex-color: #00D4FF;
+            --apex-accent: #0099FF;
+            --vortex-color: #FF006E;
+            --vortex-accent: #FF3366;
+            --bg-dark: #0A0E27;
+            --bg-medium: #0F1419;
+            --bg-light: #1a1f3a;
+            --text-main: #E0E6FF;
+            --text-secondary: #B0B6FF;
+            --border: #333;
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--bg-light) 0%, #16213e 100%);
+            border-bottom: 2px solid var(--apex-color);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(0,212,255,0.2);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0,212,255,0.5);
+        }
+        
+        .header-subtitle {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .model-selector {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .model-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid;
+            background: var(--bg-light);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .model-btn.spark {
+            color: var(--spark-color);
+            border-color: #333;
+        }
+        
+        .model-btn.spark.active {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: var(--spark-color);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .model-btn.apex {
+            color: var(--apex-color);
+            border-color: #333;
+        }
+        
+        .model-btn.apex.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--apex-color);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+        }
+        
+        .model-btn.vortex {
+            color: var(--vortex-color);
+            border-color: #333;
+        }
+        
+        .model-btn.vortex.active {
+            background: rgba(255, 0, 110, 0.1);
+            border-color: var(--vortex-color);
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.6);
+        }
+        
+        /* MAIN CONTAINER */
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 2px;
+            background: #000;
+        }
+        
+        /* LEFT PANEL - CODE EDITOR */
+        .panel-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-medium);
+            border-right: 2px solid var(--border);
+        }
+        
+        .panel-header {
+            padding: 15px 20px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        
+        .panel-header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+        
+        #codeEditor {
+            flex: 1;
+            padding: 20px;
+            background: var(--bg-medium);
+            color: var(--text-main);
+            border: none;
+            font-family: inherit;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+            scrollbar-width: thin;
+            scrollbar-color: #444 transparent;
+        }
+        
+        .panel-controls {
+            padding: 15px 20px;
+            background: var(--bg-light);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .exec-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        
+        .exec-btn.spark {
+            background: linear-gradient(135deg, var(--spark-color), var(--spark-accent));
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        .exec-btn.apex {
+            background: linear-gradient(135deg, var(--apex-color), var(--apex-accent));
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+        
+        .exec-btn.vortex {
+            background: linear-gradient(135deg, var(--vortex-color), var(--vortex-accent));
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
+        }
+        
+        .exec-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.2) inset;
+        }
+        
+        .exec-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* RIGHT PANEL - CHAT + OUTPUT */
+        .panel-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+            border-left: 2px solid var(--border);
+        }
+        
+        .tabs {
+            padding: 15px 20px;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 0;
+            border-top: 2px solid var(--border);
+        }
+        
+        .tab-btn {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            background: transparent;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .tab-btn.active {
+            color: var(--apex-color);
+            background: rgba(0, 212, 255, 0.1);
+            border-bottom: 3px solid var(--apex-color);
+        }
+        
+        /* CONTENT AREA */
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column-reverse;
+            scrollbar-width: thin;
+            scrollbar-color: #444 transparent;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+        }
+        
+        .message-user {
+            background: var(--bg-light);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--apex-color);
+            margin-bottom: 8px;
+        }
+        
+        .message-user-label {
+            font-size: 11px;
+            color: var(--apex-color);
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        
+        .message-response {
+            background: var(--bg-medium);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 3px solid var(--apex-accent);
+            font-size: 13px;
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #555;
+            padding: 40px 20px;
+        }
+        
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-medium);
+            display: flex;
+            gap: 10px;
+        }
+        
+        #questionInput {
+            flex: 1;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        #questionInput:focus {
+            border-color: var(--apex-color);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, var(--apex-color), var(--apex-accent));
+            border: none;
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.7);
+            transform: scale(1.05);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .output-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg-medium);
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            scrollbar-width: thin;
+            scrollbar-color: #444 transparent;
+        }
+        
+        .output-controls {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-light);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: #222;
+            border: none;
+            color: #666;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover:not(:disabled) {
+            background: var(--apex-color);
+            color: #000;
+        }
+        
+        .control-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        /* FOOTER */
+        .footer {
+            background: var(--bg-light);
+            border-top: 1px solid var(--border);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">🛸</div>
+            <div>
+                <div class="header-title">AXONIR PRO</div>
+                <div class="header-subtitle">100% FREE AI IDE • PURE DEVELOPMENT</div>
+            </div>
+        </div>
+        <div class="model-selector">
+            <button class="model-btn spark active" data-model="spark">🔌 Spark</button>
+            <button class="model-btn apex" data-model="apex">⚡ Apex</button>
+            <button class="model-btn vortex" data-model="vortex">🌀 Vortex</button>
+        </div>
+    </div>
+    
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- LEFT PANEL -->
+        <div class="panel-left">
+            <div class="panel-header">
+                <div class="panel-header-title">💻 CODE EDITOR</div>
+                <button class="control-btn" id="clearCodeBtn">Clear</button>
+            </div>
+            <textarea id="codeEditor" placeholder="Digite seu código Python aqui...">print("Hello, AXONIR PRO!")</textarea>
+            <div class="panel-controls">
+                <button class="exec-btn apex" id="executeBtn">▶ Executar</button>
+                <span id="codeStats" style="color: #444; margin-left: auto; font-size: 11px;">0 linhas</span>
+            </div>
+        </div>
+        
+        <!-- RIGHT PANEL -->
+        <div class="panel-right">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="chat">💬 Chat</button>
+                <button class="tab-btn" data-tab="output">📊 Output</button>
+            </div>
+            <div class="content-area">
+                <!-- CHAT TAB -->
+                <div id="chatTab" class="chat-container">
+                    <div class="empty-state">
+                        <div>Selecione um modelo e comece!</div>
+                    </div>
+                </div>
+                
+                <!-- OUTPUT TAB -->
+                <div id="outputTab" class="output-container" style="display: none;">
+                    Clique em "Executar" para ver output aqui
+                </div>
+                
+                <!-- INPUT AREA (Chat) -->
+                <div class="input-area" id="inputArea">
+                    <input type="text" id="questionInput" placeholder="Faça uma pergunta..." />
+                    <button class="send-btn" id="sendBtn">→</button>
+                </div>
+                
+                <!-- OUTPUT CONTROLS (Output) -->
+                <div class="output-controls" id="outputControls" style="display: none;">
+                    <button class="control-btn" id="copyBtn">Copy</button>
+                    <button class="control-btn" id="clearOutputBtn">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FOOTER -->
+    <div class="footer">
+        <div>💾 Chats: <span id="chatCount">0</span> | 📊 Cache: Active | ⚡ Rate Limit: OK</div>
+        <div>🛸 AXONIR PRO v1.0 • 100% Free • Powered by Groq + C++</div>
+    </div>
+    
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════════
+        // CONFIGURATION
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        const API_BASE = 'http://localhost:8000'; // Mude para seu Render URL quando deployar
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        const state = {
+            currentModel: 'apex',
+            code: 'print("Hello, AXONIR PRO!")',
+            history: [],
+            loading: false,
+            currentTab: 'chat'
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // DOM ELEMENTS
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        const elements = {
+            codeEditor: document.getElementById('codeEditor'),
+            executeBtn: document.getElementById('executeBtn'),
+            clearCodeBtn: document.getElementById('clearCodeBtn'),
+            codeStats: document.getElementById('codeStats'),
+            questionInput: document.getElementById('questionInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            chatTab: document.getElementById('chatTab'),
+            outputTab: document.getElementById('outputTab'),
+            inputArea: document.getElementById('inputArea'),
+            outputControls: document.getElementById('outputControls'),
+            chatCount: document.getElementById('chatCount'),
+            copyBtn: document.getElementById('copyBtn'),
+            clearOutputBtn: document.getElementById('clearOutputBtn')
+        };
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // MODEL SELECTION
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        document.querySelectorAll('.model-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                state.currentModel = e.target.dataset.model;
+                
+                // Update button color
+                const color = {
+                    'spark': 'spark',
+                    'apex': 'apex',
+                    'vortex': 'vortex'
+                }[state.currentModel];
+                
+                elements.executeBtn.className = `exec-btn ${color}`;
+                elements.sendBtn.className = `send-btn`;
+            });
+        });
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // CODE EDITOR
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        elements.codeEditor.addEventListener('input', (e) => {
+            state.code = e.target.value;
+            const lines = state.code.split('\n').length;
+            elements.codeStats.textContent = `${lines} linhas`;
+        });
+        
+        elements.clearCodeBtn.addEventListener('click', () => {
+            state.code = '';
+            elements.codeEditor.value = '';
+            elements.codeStats.textContent = '0 linhas';
+        });
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // CODE EXECUTION
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        elements.executeBtn.addEventListener('click', async () => {
+            if (!state.code.trim()) return;
+            
+            state.loading = true;
+            elements.executeBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_BASE}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: state.code,
+                        model: state.currentModel
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    elements.outputTab.textContent = `❌ Erro: ${error.detail || 'Unknown error'}`;
+                } else {
+                    const data = await response.json();
+                    if (data.success) {
+                        elements.outputTab.textContent = `✅ Executado\n⏱️ ${data.execution_time.toFixed(3)}s\n\n${data.output}`;
+                    } else {
+                        elements.outputTab.textContent = `❌ Erro:\n${data.error}`;
+                    }
+                }
+                
+                switchTab('output');
+            } catch (err) {
+                elements.outputTab.textContent = `❌ Erro ao conectar: ${err.message}\n\nCertifique-se que o backend está rodando em ${API_BASE}`;
+                switchTab('output');
+            }
+            
+            state.loading = false;
+            elements.executeBtn.disabled = false;
+        });
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // CHAT
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        elements.sendBtn.addEventListener('click', askAI);
+        elements.questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !state.loading) askAI();
+        });
+        
+        async function askAI() {
+            const question = elements.questionInput.value.trim();
+            if (!question) return;
+            
+            state.loading = true;
+            elements.sendBtn.disabled = true;
+            elements.questionInput.disabled = true;
+            
+            const msg = {
+                id: Date.now(),
+                model: state.currentModel,
+                question: question,
+                timestamp: new Date().toLocaleTimeString(),
+                response: '⏳ Processando...'
+            };
+            
+            state.history.unshift(msg);
+            renderChat();
+            elements.questionInput.value = '';
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: question,
+                        model: state.currentModel,
+                        context: state.code
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    msg.response = `❌ Erro: ${error.detail}`;
+                } else {
+                    const data = await response.json();
+                    msg.response = data.response;
+                }
+            } catch (err) {
+                msg.response = `❌ Erro: ${err.message}`;
+            }
+            
+            state.loading = false;
+            elements.sendBtn.disabled = false;
+            elements.questionInput.disabled = false;
+            
+            renderChat();
+            elements.chatCount.textContent = state.history.length;
+        }
+        
+        function renderChat() {
+            elements.chatTab.innerHTML = state.history.map(msg => `
+                <div class="message">
+                    <div class="message-user">
+                        <div class="message-user-label">${msg.model.toUpperCase()} • ${msg.timestamp}</div>
+                        <div>${msg.question}</div>
+                    </div>
+                    <div class="message-response">${msg.response}</div>
+                </div>
+            `).join('');
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // TABS
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                switchTab(tab);
+            });
+        });
+        
+        function switchTab(tab) {
+            state.currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === tab);
+            });
+            
+            // Update content
+            elements.chatTab.style.display = tab === 'chat' ? 'flex' : 'none';
+            elements.inputArea.style.display = tab === 'chat' ? 'flex' : 'none';
+            elements.outputTab.style.display = tab === 'output' ? 'block' : 'none';
+            elements.outputControls.style.display = tab === 'output' ? 'flex' : 'none';
+        }
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // OUTPUT CONTROLS
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        elements.copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(elements.outputTab.textContent);
+        });
+        
+        elements.clearOutputBtn.addEventListener('click', () => {
+            elements.outputTab.textContent = 'Clique em "Executar" para ver output aqui';
+        });
+        
+        // ═══════════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        window.addEventListener('load', () => {
+            console.log('🛸 AXONIR PRO Loaded');
+            console.log(`📡 API Base: ${API_BASE}`);
+            
+            // Set initial stats
+            elements.codeStats.textContent = `${state.code.split('\n').length} linhas`;
+        });
+    </script>
+</body>
+</html>
